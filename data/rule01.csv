@@ -1,0 +1,12 @@
+feature,rule
+age,00
+sex,01
+chest pain type,10
+resting bp s,10
+cholesterol,10
+fasting blood sugar,10
+resting ecg,10
+max heart rate,10
+exercise angina,11
+oldpeak,10
+ST slope,10

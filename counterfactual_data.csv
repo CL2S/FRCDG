@@ -1,0 +1,3 @@
+Type,Prediction,Probability,Avg_Impact,age,sex,chest pain type,resting bp s,cholesterol,fasting blood sugar,resting ecg,max heart rate,exercise angina,oldpeak,ST slope
+Original,1,0.6876389384269714,-,36.0,1.0,2.0,120.0,267.0,0.0,0.0,160.0,0.0,3.0,2.0
+Counter,0,0.3540284335613251,"{""max heart rate"": 0.11120350162188213}",36.0,1.0,2.0,120.0,267.0,0.0,0.0,185.22,0.0,3.0,2.0

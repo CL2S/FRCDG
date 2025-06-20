@@ -1,0 +1,13 @@
+feature,rule
+Gender,00
+Age,00
+Unit1,00
+Unit2,00
+HospAdmTime,00
+Temp,10
+HR,10
+O2Sat,10
+SBP,10
+DBP,10
+Resp,10
+MAP,10

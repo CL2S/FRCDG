@@ -1,0 +1,78 @@
+Function GenerateCounterfactual(original_sample, model, rules, feature_order):
+    max_attempts ← 150                  // Maximum number of attempts
+    best_prob ← +∞                      // Best probability (initialized to infinity)
+    best_counterfactual ← null          // Best counterfactual sample
+    feature_impact ← {}                  // Feature impact record {feature: (total_change, modification_count)}
+    
+    /* Traverse features (in importance order) */
+    for feature_idx in 0 to len(feature_order)-1:
+        current_feature ← feature_order[feature_idx]
+        attempts ← 0
+        while attempts < 12:
+            attempts ← attempts + 1 
+            /* Modify feature value based on rules */
+            if rules[current_feature].modifiable:
+                if rules[current_feature].binary:
+                    modified_value ← 1 - original_sample[current_feature]  // Binary feature inversion
+                else:
+                    modified_value ← original_sample[current_feature] ± 5%*original_value  // Continuous feature ±5% change
+                    modified_value ← clamp(modified_value, reasonable_range)       // Value range constraint
+            
+            /* Generate modified sample */
+            modified_sample ← original_sample.copy()
+            modified_sample[current_feature] ← modified_value
+            
+            prob ← model.predict_probability(modified_sample)
+            /* Evaluate modification effect */
+            if prob < 0.45:             // Meet target probability
+                if prob < best_prob:
+                    best_prob, best_counterfactual ← prob,  modified_sample.copy()
+                    update_feature_impact(current_feature, original_prob - prob)  // Update feature impact
+                break                   // Better solution found, stop current feature attempts
+            
+            if |prob - original_prob| < 0.0005:  break// Probability change is too small
+            
+            if prob < original_prob:    // Modification effective (reduce probability)
+                update_feature_impact(current_feature, original_prob - prob)
+                original_prob ← prob    // Update current best probability
+            else:
+                Reverse modification direction (+ to - or - to +)  // Modification ineffective, adjust direction
+
+
+
+
+
+ Algorithm: Dynamic Feature Update Mechanism
+Input: Initial feature importance ranking F, 
+       Modification rules R, 
+       Target prediction threshold T,
+       Max iteration K
+Output: Optimized counterfactual sample C
+
+1: Initialize:
+    current_importance ← F  # 初始特征重要性排序
+    feature_impact ← empty dict  # 记录特征修改影响
+    attempt_count ← 0
+    best_sample ← None
+
+2: while attempt_count < K do
+    2.1: 根据current_importance选择待修改特征f (优先选择重要性高的特征)
+    2.2: 根据规则R修改样本S的特征f，生成候选样本C'
+    2.3: 评估C'的预测概率P'，计算与原样本的差异Δ（如欧氏距离）
+    2.4: 记录特征f的修改影响：
+        impact = |原概率P - P'| / Δ  # 影响值=概率变化/修改幅度
+        feature_impact[f] = (feature_impact[f] * count + impact) / (count + 1)  # 滑动平均更新
+
+    2.5: 动态更新特征重要性：
+        for each feature fi in F do
+            current_importance[fi] = α * current_importance[fi] + (1-α) * feature_impact[fi]
+        end for
+        current_importance ← sort(current_importance, descending)  # 按新重要性重新排序
+
+    2.6: 如果P' < T，则：
+        best_sample ← C'
+        break  # 找到符合要求的反事实样本
+    2.7: 否则，attempt_count ← attempt_count + 1
+3: end while
+
+4: return best_sample
